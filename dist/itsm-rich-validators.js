@@ -77,147 +77,98 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 0 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(module) {function Validator(value, options) {
-    // Default messages: All object created with Validate function will share link to this object
-    var errorMessages = {
-        required: 'This field is required',
-        min: 'This field should contain at least %rule% characters',
-        max: 'This field should not contain more than %rule% characters',
-        password: 'asdasdasdasd',
-        match: 'This field shold countain a valid %rule%'
-    };
-    const regExps = {
-        email: /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i,
-        url: /^((https?):\/\/(\w+:{0,1}\w*@)?(\S+)|)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?$/,
-        numbers: /^\d+(\.\d{1,2})?$/,
-        digits: /[0-9]*$/,
-        letters: /[a-z][A-Z]*$/
-    };
-    // Extends one object from others
-    // http://youmightnotneedjquery.com/#deep_extend
-    var _extend = function (out) {
-        out = out || {};
+"use strict";
+/* WEBPACK VAR INJECTION */(function(module) {
 
-        for (var i = 1; i < arguments.length; i++) {
-            var obj = arguments[i];
+var _regexpConstant = __webpack_require__(2);
 
-            if (!obj) continue;
+var _errorMessages = __webpack_require__(3);
 
-            for (var key in obj) {
-                if (obj.hasOwnProperty(key)) {
-                    if (typeof obj[key] === 'object') out[key] = _extend(out[key], obj[key]);else out[key] = obj[key];
-                }
-            }
-        }
-
-        return out;
-    };
-    var defaults = {
-        regExps: regExps,
-        errorMessages: errorMessages
-    };
-
-    // Set basic options to get access from onSuccess and onError functions
-    this.options = _extend({}, defaults, options);
+function Validator(value, config) {
+    var _this = this;
 
     this.value = value;
-    this.options = options;
-    this.rules = options.rules;
-    this.errorMessages = options.errorMessages;
-
-    this.required = function () {
-        return this.value.trim().length > 0;
-    };
-    this.min = function (param) {
-        return this.value.length >= param;
-    };
-    this.max = function (param) {
-        return this.value.length <= param;
-    };
-    this.match = function (param) {
-        var re = regExps[param];
-        if (!re) {
-            throw new Error('There are no such predefined regexp: ' + param + '. All predefined regExps are: ' + Object.keys(this.options.regExps).join(', '));
-        }
-        return regExps[param].test(this.value);
-    };
+    this.config = config;
+    this.rules = config.rules;
+    this.regExps = _regexpConstant.REG_EXP;
+    this.errorMessages = Object.assign({}, _errorMessages.ERROR_MESSAGES, config.errorMessages);
 
     // Creates errorMessages by replacement %var% templates
-    var _createMessage = function (message, settings) {
+    var _createMessage = function _createMessage(message, settings) {
         for (var key in settings) {
             message = message.replace('%' + key + '%', settings[key]);
         }
         return message;
     };
 
-    var Validate = function (element, options) {
-        if (!options.rules || Object.keys(options.rules).length === 0) {
-            throw new Error('No rules for validation were passed to Validator function');
-        }
-        // Set regExps from outer scope
-        this.regExps = regExps;
-    };
+    // var Validate = function (element, config) {
+    //     if (!config.rules || Object.keys(config.rules).length === 0) {
+    //         throw new Error('No rules for validation were passed to Validator function');
+    //     }
+    //     // Set regExps from outer scope
+    //     this.regExps = regExps;
+    // };
 
     this.validate = function () {
-        let isValid = true;
+        var isValid = true;
 
         for (var rule in this.rules) {
-            // Set testing function
-            var test = this[rule];
-
-            if (!test || typeof test !== 'function') {
-                throw new Error('Rule ' + rule + ' can\'t be evaluated. It is not predefined. You can create it yourself with Validator.fn');
-            }
-
-            // Grab param from options object
+            var testFn = this[rule];
+            // Grab param value from config.rules
             var param = this.rules[rule];
+
+            if (!testFn || typeof testFn !== 'function') {
+                throw new Error('Rule ' + rule + ' can\'t be evaluated. It is not predefined. You can create custom rule with "addRule" method. validator.addRule("name", fn)');
+            }
 
             if (!this[rule](param)) {
                 isValid = false;
-                this.message = _createMessage(this.errorMessages[rule], { rule: param, data: this.value });
-                this.options.onError.call(this);
+                this.message = _createMessage(this.errorMessages[rule], { rule: param, value: this.value });
+                this.config.onError.call(this);
                 break;
             }
         }
 
         if (isValid) {
-            this.options.onSuccess.call(this);
+            this.config.onSuccess.call(this);
         }
     };
 
     this.addRule = function (name, func) {
         this[name] = func;
     };
+
+    this.required = function () {
+        return _this.value.trim().length > 0;
+    };
+    this.min = function (val) {
+        return _this.value.length >= val;
+    };
+    this.max = function (val) {
+        return _this.value.length <= val;
+    };
+    this.match = function (regExpName) {
+        var reg = _this.regExps[regExpName];
+        if (!reg) {
+            throw new Error('There are no such predefined regexp: ' + regExpName + '. All predefined regExps are: ' + Object.keys(_this.regExps).join(', '));
+        }
+        return reg.test(_this.value);
+    };
 }
 
-const REG_EXP = {
-    IP_V4: /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/,
-    EMAIL: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
-    PHONE: /^[0-9+\-()._\[\]{}\\\/ ]+$/,
-    SITE: /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,63}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)$/,
-    LATIN_AND_DIGITS_SPECIAL_SYMBOLS: /^[\w\d\s*#+!@$%^&()\-=]+$/,
-    NUMBER: /^[0-9]*$/,
-    IPV6: /^s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:)))(%.+)?s*/,
-    IPV6CIDR: /^s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:)))(%.+)?s*(\/(d|dd|1[0-1]d|12[0-8]))$/,
-    IPV4: /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/,
-    IPV4CIDR: /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$/,
-    RFC_952: /^(https?:\/\/)?(([a-z][a-z0-9\-]*(\.[a-z][a-z0-9\-]*)*|[1,2]*\d*\d+)|((\d{1,2}|1\d{2}|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d{2}|2[0-4]\d|25[0-5]))(:(\d{1,4}|[0-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5]))?\/?$/i,
-    EMPTY_STRING: /^$/,
-    UNIX_PATH: /^(\/[^/ ]*)+\/?$/,
-    HOST: /^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$/
+var onError = function onError() {
+    console.log(this.message);
 };
-const onError = function () {
-    console.log('Ошибка: ' + this.message);
-};
-const onSuccess = function () {
+var onSuccess = function onSuccess() {
     console.log('Ура! Всё прошло хорошо');
 };
 
-let email = new Validator('r.u.f.f@mail.ru', {
+var email = new Validator('r.u.', {
     rules: {
+        required: true,
         min: 5,
         max: 20,
-        match: 'email'
+        match: 'EMAIL'
     },
     errorMessages: {
         min: 'Это поле должно содержать минимум %rule% символов. Значение %value% не подходит',
@@ -227,7 +178,7 @@ let email = new Validator('r.u.f.f@mail.ru', {
     onError: onError,
     onSuccess: onSuccess
 });
-let password = new Validator('123123123123', {
+var password = new Validator('123123123123', {
     rules: {
         required: true,
         password: true
@@ -244,8 +195,11 @@ password.addRule('password', function () {
     return this.value.toLowerCase() === '12345qwerty';
 });
 
-email.validate();
-password.validate();
+var validators = [email, password];
+
+validators.forEach(function (validator) {
+    validator.validate();
+});
 
 module.export = Validator;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)(module)))
@@ -277,6 +231,55 @@ module.exports = function(module) {
 	return module;
 };
 
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+var CONSTANTS = {
+    IP_V4: /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/,
+    EMAIL: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+    PHONE: /^[0-9+\-()._\[\]{}\\\/ ]+$/,
+    SITE: /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,63}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)$/,
+    LATIN_AND_DIGITS_SPECIAL_SYMBOLS: /^[\w\d\s*#+!@$%^&()\-=]+$/,
+    NUMBER: /^[0-9]*$/,
+    IPV6: /^s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:)))(%.+)?s*/,
+    IPV6CIDR: /^s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:)))(%.+)?s*(\/(d|dd|1[0-1]d|12[0-8]))$/,
+    IPV4: /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/,
+    IPV4CIDR: /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$/,
+    RFC_952: /^(https?:\/\/)?(([a-z][a-z0-9\-]*(\.[a-z][a-z0-9\-]*)*|[1,2]*\d*\d+)|((\d{1,2}|1\d{2}|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d{2}|2[0-4]\d|25[0-5]))(:(\d{1,4}|[0-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5]))?\/?$/i,
+    EMPTY_STRING: /^$/,
+    UNIX_PATH: /^(\/[^/ ]*)+\/?$/,
+    HOST: /^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$/
+};
+
+var REG_EXP = exports.REG_EXP = CONSTANTS;
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+var CONSTANTS = {
+    required: 'This field is required',
+    email: 'Email field is required',
+    min: 'This field should contain at least %rule% characters',
+    max: 'This field should not contain more than %rule% characters',
+    match: 'This field should contain a valid %rule%'
+};
+
+var ERROR_MESSAGES = exports.ERROR_MESSAGES = CONSTANTS;
 
 /***/ })
 /******/ ]);
