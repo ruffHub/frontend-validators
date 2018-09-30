@@ -93,7 +93,6 @@ function Validator(value, config) {
     this.regExps = _regexpConstant.REG_EXP;
     this.errorMessages = Object.assign({}, _errorMessages.ERROR_MESSAGES, config.errorMessages);
 
-    // Creates errorMessages by replacement %var% templates
     var _createMessage = function _createMessage(message, settings) {
         for (var key in settings) {
             message = message.replace('%' + key + '%', settings[key]);
@@ -109,6 +108,9 @@ function Validator(value, config) {
     //     this.regExps = regExps;
     // };
 
+    /**
+     *
+     */
     this.validate = function () {
         var isValid = true;
 
@@ -134,10 +136,16 @@ function Validator(value, config) {
         }
     };
 
+    /**
+     * Add custom validate function to validator instance
+     * @param name
+     * @param func
+     */
     this.addRule = function (name, func) {
         this[name] = func;
     };
 
+    // Here you can add methods for data validation
     this.required = function () {
         return _this.value.trim().length > 0;
     };
@@ -156,13 +164,6 @@ function Validator(value, config) {
     };
 }
 
-var onError = function onError() {
-    console.log(this.message);
-};
-var onSuccess = function onSuccess() {
-    console.log('Ура! Всё прошло хорошо');
-};
-
 var email = new Validator('r.u.', {
     rules: {
         required: true,
@@ -175,24 +176,32 @@ var email = new Validator('r.u.', {
         max: 'Это поле должно содержать максимум %rule% символов. Значение %value% не подходит',
         match: 'Это поле должно содержать адрес электронной почты. Значение %value% не подходит'
     },
-    onError: onError,
-    onSuccess: onSuccess
+    onError: function onError() {
+        console.log(this.message);
+    },
+    onSuccess: function onSuccess() {
+        console.log('Ура! Всё прошло хорошо');
+    }
 });
-var password = new Validator('123123123123', {
+var password = new Validator('qwewewewe', {
     rules: {
         required: true,
         password: true
     },
     errorMessages: {
         required: 'Это поле обязательно для заполнения!',
-        password: 'Пароль должет быть 12345qwerty Значение "%value%" не подходит'
+        password: 'Пароль должет быть qweqweqwe Значение "%value%" не подходит'
     },
-    onError: onError,
-    onSuccess: onSuccess
+    onError: function onError() {
+        console.log(this.message);
+    },
+    onSuccess: function onSuccess() {
+        console.log('Ура! Всё прошло хорошо');
+    }
 });
 
 password.addRule('password', function () {
-    return this.value.toLowerCase() === '12345qwerty';
+    return this.value.toLowerCase() === 'qweqweqwe';
 });
 
 var validators = [email, password];
