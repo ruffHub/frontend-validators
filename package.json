@@ -1,0 +1,27 @@
+{
+  "name": "itsm-rich-validators",
+  "version": "0.2.0",
+  "description": "Validtors used in COMODO ITSM project",
+  "main": "dist/itsm-rich-validators.js",
+  "dependencies": {},
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.4",
+    "babel-preset-env": "^1.6.1",
+    "webpack": "^3.11.0"
+  },
+  "scripts": {
+    "publish-as-major": "itsm-frontend-versions-manager -p major",
+    "publish-as-minor": "itsm-frontend-versions-manager -p minor",
+    "publish-as-patch": "itsm-frontend-versions-manager -p patch",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack --env dev && webpack --env build",
+    "dev": "webpack --progress --colors --watch --env dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@git.mdm.comodo.od.ua:frontend/itsm-frontend-validators.git"
+  },
+  "author": "Ruslan Smolovyk <ruslan.smolovik@nurd.com>",
+  "license": "ISC"
+}

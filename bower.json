@@ -1,0 +1,18 @@
+{
+  "name": "itsm-rich-validators",
+  "description": "Validtors used in COMODO ITSM project",
+  "main": "dist/itsm-rich-validators.js",
+  "authors": [
+    "Ruslan Smolovyk <ruslan.smolovik@nurd.com>"
+  ],
+  "license": "ISC",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "version": "0.2.0"
+}
